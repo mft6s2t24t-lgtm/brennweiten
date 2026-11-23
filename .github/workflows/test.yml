@@ -1,4 +1,4 @@
-name: Selbsttest
+name: Self-test
 
 on:
   push:
@@ -9,14 +9,21 @@ permissions:
 
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v4
-      - name: ExifTool installieren
-        run: brew install exiftool
-      - name: Testbilder erzeugen
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install ExifTool
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libimage-exiftool-perl
+      - name: Create test images
         run: bash test/make_testfotos.sh
-      - name: Selbsttest
+      - name: Run self-test
         run: |
-          /usr/bin/python3 test/check.py | tee ergebnis.txt
+          python test/check.py | tee ergebnis.txt
           grep -q "FEHLER: keine" ergebnis.txt

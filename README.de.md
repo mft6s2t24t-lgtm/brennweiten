@@ -1,8 +1,28 @@
 # Brennweiten
 
-**Welche Brennweiten nutzt du wirklich?** Brennweiten ist eine kostenlose Mac-App, die die EXIF-Daten deiner Fotos auswertet. So siehst du anhand deiner eigenen Bilder, wie du Objektive und Kameras einsetzt und was ein neues Objektiv für dich ändern würde.
-
 **Deutsch** · [English](README.md)
+
+[![Aktuelle Version](https://img.shields.io/github/v/release/mft6s2t24t-lgtm/brennweiten)](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest) [![Self-test](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml/badge.svg)](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml) ![macOS 12.3+](https://img.shields.io/badge/macOS-12.3%2B-blue) [![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Welche Brennweiten nutzt du wirklich?** Wähle deine Fotoordner in dieser kostenlosen Mac-App und sieh, wie du tatsächlich fotografierst, bevor du das nächste Objektiv kaufst.
+
+**[⬇ Für Mac laden](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest/download/Brennweiten.dmg)** · Apple Silicon und Intel · macOS 12.3+ · kein Konto
+
+![Brennweiten-Übersicht mit Brennweitenverteilung](docs/screenshots/overview.png)
+
+*Die Screenshots zeigen erfundene Demodaten in der englischen Ansicht. Die App gibt es auch komplett auf Deutsch.*
+
+## In 2 Minuten ausprobieren
+
+1. [`Brennweiten.dmg` laden](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest/download/Brennweiten.dmg), öffnen und **Brennweiten** in den Ordner **Programme** ziehen.
+2. App öffnen. macOS blockiert den ersten Start, weil die App nicht von Apple beglaubigt ist. Unter **Systemeinstellungen → Datenschutz & Sicherheit** auf **Dennoch öffnen** klicken und die eingebauten Programmteile einmal freigeben.
+3. Einen Fotoordner wählen. Für den ersten Eindruck reicht ein kleiner Ordner.
+
+Deine Fotos werden nur gelesen. Wie du die App wieder entfernst, steht in der [Anleitung](LIESMICH.md#deine-daten). Lieber erst prüfen? Du kannst sie auch [selbst bauen](#selbst-bauen).
+
+**Ausprobiert?** Schreib in einem [Issue](../../issues/new/choose), was geklappt hat und was nicht. Rückmeldungen zu anderen Kameramarken helfen besonders.
+
+## Warum deine Fotos sicher bleiben
 
 - **Nur lesend:** Fotos werden nie verändert, verschoben oder umbenannt.
 - **Komplett lokal:** Keine Cloud, kein Konto, kein Tracking. Die App braucht kein Internet.
@@ -25,17 +45,15 @@
 
 Unterstützt werden NEF, NRW, CR2, CR3, JPG, HEIF, TIFF und DNG. Alle Brennweiten werden auf Kleinbild (KB) umgerechnet.
 
-## Installation
+## Mehr sehen
 
-Voraussetzung ist macOS 12.3 oder neuer, auf Apple Silicon oder Intel.
+| Objektiv vor dem Kauf prüfen | Ein Objektiv analysieren |
+|---|---|
+| ![Objektiv prüfen](docs/screenshots/check-lens.png) | ![Objektivdetails](docs/screenshots/lens-detail.png) |
 
-1. Lade `Brennweiten.dmg` unter [Releases](../../releases) herunter.
-2. Öffne die Datei und ziehe **Brennweiten** in den Ordner **Programme**.
-3. Starte die App und wähle deine Fotoordner aus.
+![Fototage](docs/screenshots/shooting-days.png)
 
-Die App ist derzeit nicht von Apple signiert, deshalb blockiert macOS den ersten Start. Öffne dann **Systemeinstellungen → Datenschutz & Sicherheit** und klicke auf **Dennoch öffnen**. Wenn du dem Download nicht vertraust, kannst du die App selbst aus dem Quellcode bauen.
-
-Die ausführliche Bedienung steht in [LIESMICH.md](LIESMICH.md).
+Die ausführliche Bedienung steht in der [Anleitung](LIESMICH.md).
 
 ## Selbst bauen
 
