@@ -2,7 +2,27 @@
 
 [Deutsch](README.de.md) · **English**
 
-**Which focal lengths do you really use?** Brennweiten (German for "focal lengths") is a free Mac app that analyzes the EXIF data of your photos. Your own images show how you use your lenses and cameras, and what a new lens would change for you.
+[![Latest release](https://img.shields.io/github/v/release/mft6s2t24t-lgtm/brennweiten)](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest) [![Self-test](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml/badge.svg)](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml) ![macOS 12.3+](https://img.shields.io/badge/macOS-12.3%2B-blue) [![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Which focal lengths do you really use?** Point this free Mac app at your photo folders and see how you actually shoot, before you buy your next lens.
+
+**[⬇ Download for Mac](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest/download/Brennweiten.dmg)** · Apple silicon and Intel · macOS 12.3+ · no account
+
+![Brennweiten overview with focal length distribution](docs/screenshots/overview.png)
+
+*Screenshots use made-up demo data.*
+
+## Try it in 2 minutes
+
+1. [Download `Brennweiten.dmg`](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest/download/Brennweiten.dmg), open it and drag **Brennweiten** to **Applications**.
+2. Open the app. macOS blocks the first launch because the app is not notarized by Apple. Go to **System Settings → Privacy & Security**, click **Open Anyway**, then allow the bundled components once.
+3. Choose a photo folder. A small folder is enough for a first look.
+
+Your photos are only read. To remove the app later, follow the [uninstall steps](GUIDE.md#your-data). Prefer to check first? You can [build it from source](#build-it-yourself).
+
+**Tried it?** Tell me what worked and what did not in an [issue](../../issues/new/choose). Feedback on other camera brands is especially useful.
+
+## Why you can trust it with your photos
 
 - **Read-only:** Photos are never changed, moved or renamed.
 - **Fully local:** No cloud, no account, no tracking. The app does not need the internet.
@@ -25,15 +45,13 @@
 
 Supported formats are NEF, NRW, CR2, CR3, JPG, HEIF, TIFF and DNG. All focal lengths are converted to their full-frame equivalent.
 
-## Installation
+## See more
 
-Requires macOS 12.3 or later, on Apple silicon or Intel.
+| Check a lens before buying | Analyze one lens |
+|---|---|
+| ![Check a lens](docs/screenshots/check-lens.png) | ![Lens details](docs/screenshots/lens-detail.png) |
 
-1. Download `Brennweiten.dmg` from [Releases](../../releases).
-2. Open it and drag **Brennweiten** to your **Applications** folder.
-3. Open the app and choose your photo folders.
-
-The app is not signed by Apple yet, so macOS blocks the first launch. Go to **System Settings → Privacy & Security** and click **Open Anyway**. If you do not trust the download, you can build the app yourself from source.
+![Shooting days](docs/screenshots/shooting-days.png)
 
 Full instructions are in the [guide](GUIDE.md).
 
