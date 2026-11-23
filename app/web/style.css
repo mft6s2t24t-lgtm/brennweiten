@@ -219,6 +219,9 @@ html { scroll-padding-top: 76px; }
 .side .tabs button.active { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .navlabel { padding: 12px 10px 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
 .side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.langs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; }
+.langs button { margin: 0; padding: 4px 2px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 12px; }
+.langs button.on { background: var(--accent); color: #fff; }
 .side-foot .scanpill { margin: 0; border-radius: 8px; padding: 7px 10px; }
 #quit, .scanpill:not([hidden]) + #quit { margin: 0; }
 body.native #quit { display: none; }

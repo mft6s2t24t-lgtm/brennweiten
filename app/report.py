@@ -3,7 +3,10 @@ import datetime
 
 import analyse
 import features
+import i18n
 from analyse import fmt
+
+_ = i18n.t
 
 W, H = 595.28, 841.89
 M = 42
@@ -72,7 +75,7 @@ class Pdf:
             self.new_page()
 
     def text(self, x, y, s, size=9, bold=False, color=INK, align="l"):
-        s = clean(s)
+        s = clean(_(s) if isinstance(s, str) else s)
         if align == "r":
             x -= width(s, size)
         self.cur.append("%.3f %.3f %.3f rg BT /%s %.1f Tf %.2f %.2f Td (%s) Tj ET" % (
@@ -85,6 +88,7 @@ class Pdf:
         self.cur.append("%.3f %.3f %.3f RG 0.5 w %.2f %.2f m %.2f %.2f l S" % (color[0], color[1], color[2], x1, y1, x2, y2))
 
     def h(self, s, sub=""):
+        s, sub = _(s), _(sub)
         self.need(95)
         self.y -= 14
         self.text(M, self.y, s, 12, True)
@@ -101,7 +105,7 @@ class Pdf:
         def head():
             x = M
             for t, w, a in cols:
-                self.text(x + w - 3 if a == "r" else x, self.y, t, 8, True, GREY, a)
+                self.text(x + w - 3 if a == "r" else x, self.y, _(t), 8, True, GREY, a)
                 x += w
             self.y -= 4
             self.line(M, self.y, W - M, self.y)
@@ -127,8 +131,8 @@ class Pdf:
     def output(self):
         n = len(self.pages)
         for i, c in enumerate(self.pages):
-            c.append("%.3f %.3f %.3f rg BT /F1 8 Tf %.2f %.2f Td (Seite %d von %d) Tj ET" % (
-                GREY[0], GREY[1], GREY[2], W - M - 55, 24, i + 1, n))
+            c.append("%.3f %.3f %.3f rg BT /F1 8 Tf %.2f %.2f Td (%s) Tj ET" % (
+                GREY[0], GREY[1], GREY[2], W - M - 55, 24, _("Seite %d von %d") % (i + 1, n)))
         objs = {1: b"<< /Type /Catalog /Pages 2 0 R >>",
                 3: b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
                 4: b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"}
@@ -157,11 +161,11 @@ class Pdf:
 
 
 def pc(v):
-    return fmt(float(v)) + " %"
+    return i18n.percent(fmt(float(v)))
 
 
 def num(v):
-    return "{:,}".format(int(v)).replace(",", ".")
+    return i18n.number(v)
 
 
 def build(conn, f, filter_text):
@@ -170,8 +174,8 @@ def build(conn, f, filter_text):
     pdf.y -= 8
     pdf.text(M, pdf.y, "Brennweiten-Bericht", 20, True)
     pdf.y -= 16
-    pdf.text(M, pdf.y, "Erstellt am %s  ·  Alle Brennweiten im Kleinbild-Äquivalent  ·  Nur Fakten aus den eigenen Fotos"
-             % datetime.date.today().strftime("%d.%m.%Y"), 8.5, False, GREY)
+    pdf.text(M, pdf.y, _("Erstellt am %s  ·  Alle Brennweiten im Kleinbild-Äquivalent  ·  Nur Fakten aus den eigenen Fotos")
+             % datetime.date.today().strftime("%Y-%m-%d" if i18n.lang() == "en" else "%d.%m.%Y"), 8.5, False, GREY)
     pdf.y -= 12
     pdf.text(M, pdf.y, fit("Filter: " + filter_text, 8.5, W - 2 * M), 8.5, False, GREY)
     pdf.y -= 22
@@ -180,10 +184,10 @@ def build(conn, f, filter_text):
         return pdf.output()
 
     p = r["period"]
-    tiles = [(num(r["n_total"]), "Bilder", "%s bis %s" % (p[0], p[1]) if p else ""),
+    tiles = [(num(r["n_total"]), "Bilder", (("%s to %s" if i18n.lang() == "en" else "%s bis %s") % (p[0], p[1])) if p else ""),
              (fmt(r["median"]) + " mm", "Median-Brennweite", "KB"),
-             (pc(r["uww"]["u24_pct"]), "unter 24 mm", "unter 20 mm: " + pc(r["uww"]["u20_pct"])),
-             (pc(r["around"]["p85"]), "um 85 mm", "um 50 mm: " + pc(r["around"]["p50"]))]
+             (pc(r["uww"]["u24_pct"]), "unter 24 mm", _("unter 20 mm") + ": " + pc(r["uww"]["u20_pct"])),
+             (pc(r["around"]["p85"]), "um 85 mm", _("um 50 mm") + ": " + pc(r["around"]["p50"]))]
     tw = (W - 2 * M - 18) / 4
     for k, (v, l, s) in enumerate(tiles):
         x = M + k * (tw + 6)
@@ -197,7 +201,7 @@ def build(conn, f, filter_text):
     mx = max(c["pct"] for c in r["classes"]) or 1
     for c in r["classes"]:
         pdf.need(14)
-        pdf.text(M, pdf.y, c["label"] + " mm", 8.5)
+        pdf.text(M, pdf.y, _(c["label"]) + " mm", 8.5)
         bw = 330
         pdf.rect(M + 62, pdf.y - 1, bw * c["pct"] / mx if c["pct"] else 0.1, 8, BLUE)
         pdf.text(W - M, pdf.y, "%s  ·  %s" % (num(c["n"]), pc(c["pct"])), 8.5, align="r")
@@ -235,11 +239,11 @@ def build(conn, f, filter_text):
                for x in sim["single"]])
 
     d = features.days(conn, f)
-    pdf.h("Fototage", "%s Tage, im Schnitt %s Fotos" % (num(d["days"]), fmt(d["per_day"])))
+    pdf.h("Fototage", _("%s Tage, im Schnitt %s Fotos") % (num(d["days"]), fmt(d["per_day"])))
     pdf.table([("Objektive am Tag", 200, "l"), ("Tage", 80, "r"), ("Anteil", 80, "r"), ("", 151, "l")],
               [[x["label"], num(x["days"]), pc(x["pct"]), ("bar", x["pct"])] for x in d["dist"]])
     pdf.need(14)
-    pdf.text(M, pdf.y, "Weitwinkel (bis %d mm) und Tele (ab %d mm) am selben Tag: %s Tage (%s)"
+    pdf.text(M, pdf.y, _("Weitwinkel (bis %d mm) und Tele (ab %d mm) am selben Tag: %s Tage (%s)")
              % (d["wide"], d["tele"], num(d["both"]), pc(d["both_pct"])), 8.5)
     pdf.y -= 14
     return pdf.output()

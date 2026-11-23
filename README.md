@@ -1,44 +1,45 @@
 # Brennweiten
 
-**Welche Brennweiten nutzt du wirklich?** Brennweiten ist eine kostenlose Mac-App, die die EXIF-Daten deiner Fotos auswertet. So siehst du anhand deiner eigenen Bilder, wie du Objektive und Kameras einsetzt und was ein neues Objektiv für dich ändern würde.
+[Deutsch](README.de.md) · **English**
 
-*English summary below.*
+**Which focal lengths do you really use?** Brennweiten (German for "focal lengths") is a free Mac app that analyzes the EXIF data of your photos. Your own images show how you use your lenses and cameras, and what a new lens would change for you.
 
-- **Nur lesend:** Fotos werden nie verändert, verschoben oder umbenannt.
-- **Komplett lokal:** Keine Cloud, kein Konto, kein Tracking. Die App braucht kein Internet.
-- **Keine Zusatzinstallation:** Python und ExifTool sind im App-Paket enthalten.
-- **Keine Kaufempfehlung:** Die App zeigt Zahlen und Fakten, die Entscheidung bleibt bei dir.
+- **Read-only:** Photos are never changed, moved or renamed.
+- **Fully local:** No cloud, no account, no tracking. The app does not need the internet.
+- **Nothing else to install:** Python and ExifTool are included in the app.
+- **No purchase advice:** The app shows numbers and facts. The decision stays with you.
+- **Bilingual:** English and German. It follows your Mac's language at first launch and can be switched anytime.
 
-## Funktionen
+## Features
 
-| Bereich | Was du bekommst |
+| Section | What you get |
 |---|---|
-| **Übersicht** | Frei wählbare Kennzahlen, Brennweitenverteilung, meistgenutzte Objektive, Entwicklung pro Jahr |
-| **Objektive** | Rangliste und Detailanalyse mit Blenden, Zoom am Anschlag, Offenblende bei wenig Licht und Trefferquote |
-| **Kameras** | Rangliste und Detailanalyse mit Brennweiten, Objektiven, ISO und Belichtungszeiten |
-| **Fototage** | Auswertung einzelner Tage und Reisen nach Kameras, Objektiven und Einstellungen |
-| **Tabelle** | Alle Fotos mit Excel-artigen Filtern, Sortierung und CSV-Export |
-| **Objektiv prüfen** | Bis zu drei Wunschobjektive gegen deine bisherigen Fotos prüfen |
-| **Vergleich** | Objektive, Kameras oder Zeiträume nebeneinander |
-| **Verwaltung** | Objektivnamen vereinheitlichen, Crop-Faktoren prüfen, Datenqualität, Ordner auf SSD oder NAS |
+| **Overview** | Customizable metrics, focal length distribution, most used lenses, trends by year |
+| **Lenses** | Ranking and detailed analysis with apertures, zoom limits, wide-open use in low light and keeper rate |
+| **Cameras** | Ranking and detailed analysis with focal lengths, lenses, ISO and shutter speeds |
+| **Shooting days** | Analysis of single days and trips by camera, lens and settings |
+| **Table** | All photos with Excel-style filters, sorting and CSV export |
+| **Check a lens** | Test up to three lenses you are considering against your existing photos |
+| **Compare** | Lenses, cameras or time periods side by side |
+| **Manage** | Unify lens names, check crop factors, review data quality, use folders on SSD or NAS |
 
-Unterstützt werden NEF, NRW, CR2, CR3, JPG, HEIF, TIFF und DNG. Alle Brennweiten werden auf Kleinbild (KB) umgerechnet.
+Supported formats are NEF, NRW, CR2, CR3, JPG, HEIF, TIFF and DNG. All focal lengths are converted to their full-frame equivalent.
 
 ## Installation
 
-Voraussetzung ist macOS 12.3 oder neuer, auf Apple Silicon oder Intel.
+Requires macOS 12.3 or later, on Apple silicon or Intel.
 
-1. Lade `Brennweiten.dmg` unter [Releases](../../releases) herunter.
-2. Öffne die Datei und ziehe **Brennweiten** in den Ordner **Programme**.
-3. Starte die App und wähle deine Fotoordner aus.
+1. Download `Brennweiten.dmg` from [Releases](../../releases).
+2. Open it and drag **Brennweiten** to your **Applications** folder.
+3. Open the app and choose your photo folders.
 
-Die App ist derzeit nicht von Apple signiert, deshalb blockiert macOS den ersten Start. Öffne dann **Systemeinstellungen → Datenschutz & Sicherheit** und klicke auf **Dennoch öffnen**. Wenn du dem Download nicht vertraust, kannst du die App selbst aus dem Quellcode bauen.
+The app is not signed by Apple yet, so macOS blocks the first launch. Go to **System Settings → Privacy & Security** and click **Open Anyway**. If you do not trust the download, you can build the app yourself from source.
 
-Die ausführliche Bedienung steht in [LIESMICH.md](LIESMICH.md).
+Full instructions are in the [guide](GUIDE.md).
 
-## Selbst bauen
+## Build it yourself
 
-Du brauchst die Xcode Command Line Tools und ExifTool über Homebrew:
+You need the Xcode Command Line Tools and ExifTool from Homebrew:
 
 ```bash
 xcode-select --install
@@ -52,42 +53,34 @@ brew install exiftool
 build/baue_app.sh
 ```
 
-Das Skript lädt eine geprüfte Python-Laufzeit (SHA-256) und legt `Brennweiten.dmg` und `Brennweiten.zip` in `dist/` ab.
+The script downloads a verified Python runtime (SHA-256) and puts `Brennweiten.dmg` and `Brennweiten.zip` in `dist/`.
 
-Selbsttest mit erzeugten Testbildern:
+Self-test with generated test images:
 
 ```bash
 bash test/make_testfotos.sh && python3 test/check.py
 ```
 
-## Aufbau
+## Structure
 
-| Pfad | Inhalt |
+| Path | Contents |
 |---|---|
-| `app/` | Lokaler Python-Server (nur Standardbibliothek), SQLite und Auswertungen |
-| `app/web/` | Oberfläche in HTML, CSS und JavaScript ohne Frameworks |
-| `native/` | Mac-Fenster in Swift |
-| `build/` | Build-Skript und App-Icon |
-| `test/` | Testbild-Generator und Selbsttest |
+| `app/` | Local Python server (standard library only), SQLite and analyses |
+| `app/web/` | Interface in HTML, CSS and JavaScript without frameworks, English texts in `en.json` |
+| `native/` | Mac window in Swift |
+| `build/` | Build script and app icon |
+| `test/` | Test image generator and self-test |
 
-## Mitmachen
+## Contributing
 
-Fehlerberichte, Ideen und Korrekturen sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md). Besonders hilfreich sind Tests mit Kameras und Objektiven, die noch nicht richtig erkannt werden.
+Bug reports, ideas and fixes are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Tests with cameras and lenses that are not detected correctly yet are especially helpful.
 
-## Entstehung
+## Background
 
-Idee, Konzept und fachliche Anforderungen stammen vom Projektinitiator, einem Fotografen. Der Code wurde mit [Claude](https://claude.com/claude-code) von Anthropic entwickelt. Ein unabhängiges Code-Review steht noch aus, Hinweise sind deshalb besonders willkommen.
+The idea, concept and photographic requirements come from the project's initiator, a photographer. The code was developed with [Claude](https://claude.com/claude-code) by Anthropic. An independent code review is still pending, so feedback is especially welcome.
 
-## Lizenz und Hinweise
+## License and notices
 
-Der Code steht unter der [MIT-Lizenz](LICENSE). Mitgelieferte Fremdsoftware behält ihre eigenen Lizenzen, siehe [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The code is released under the [MIT License](LICENSE). Bundled third-party software keeps its own licenses, see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Die Software wird kostenlos und ohne Gewähr bereitgestellt. Dies ist ein privates, nicht kommerzielles Projekt. Es steht in keiner Verbindung zu Nikon, Canon, Apple oder anderen genannten Herstellern. Genannte Marken gehören ihren jeweiligen Inhabern.
-
----
-
-## English summary
-
-Brennweiten ("focal lengths") is a free macOS app that analyzes the EXIF data of your photos and shows which focal lengths, lenses, cameras and settings you actually use. It can also check a prospective lens against your existing photos.
-
-It is read-only, runs entirely offline and bundles its dependencies. The interface is currently German. The code is MIT licensed, and bundled third-party components keep their own licenses. The app was developed with Claude and has not yet had an independent code review.
+The software is provided free of charge and without warranty. This is a private, non-commercial project. It is not affiliated with Nikon, Canon, Apple or any other manufacturer mentioned. All trademarks belong to their respective owners.

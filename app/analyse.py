@@ -1,4 +1,5 @@
 """Auswertungen. Alle Brennweiten im Kleinbild-Äquivalent (KB), sofern nicht anders angegeben."""
+import i18n
 import csv
 import datetime
 import io
@@ -157,11 +158,11 @@ def analyse(conn, f):
     res["period"] = [dates[0][:10], dates[-1][:10]] if dates else None
     hint = None
     if f.get("good") and (rated < 0.2 * len(allimgs) or good_n < 50):
-        hint = ("Nur %s %% der Bilder haben eine Bewertung, %d davon mit ≥ 3 Sternen. "
-                "Die Auswertung „nur gute Bilder“ ist daher wenig aussagekräftig."
+        hint = (i18n.t("Nur %s %% der Bilder haben eine Bewertung, %d davon mit ≥ 3 Sternen. "
+                       "Die Auswertung „nur gute Bilder“ ist daher wenig aussagekräftig.")
                 % (fmt(res["rated_pct"]), good_n))
     elif not f.get("good") and rated < 0.2 * max(1, len(allimgs)):
-        hint = ("Nur %s %% der Bilder sind bewertet – der Filter „ab 3 Sternen“ hätte wenig Daten."
+        hint = (i18n.t("Nur %s %% der Bilder sind bewertet – der Filter „ab 3 Sternen“ hätte wenig Daten.")
                 % fmt(res["rated_pct"]))
     res["rating_hint"] = hint
     res["median"] = round(statistics.median([i["kb"] for i in withkb]), 1) if withkb else None
@@ -305,7 +306,7 @@ def fmt(v, nd=1):
         s = ("%." + str(nd) + "f") % v
         if "." in s:
             s = s.rstrip("0").rstrip(".")
-        return s.replace(".", ",")
+        return i18n.decimal(s)
     return str(v)
 
 
@@ -316,8 +317,8 @@ def export_csv(conn, f, sort=None, cols=None):
     columns = tabelle.pick(cols)
     buf = io.StringIO()
     buf.write("\ufeff")
-    w = csv.writer(buf, delimiter=";")
-    w.writerow([c[1] for c in columns])
+    w = csv.writer(buf, delimiter=i18n.csv_delimiter())
+    w.writerow([i18n.t(c[1]) for c in columns])
     for i in imgs:
         w.writerow([tabelle.export_value(c, i, fmt) for c in columns])
     return buf.getvalue()
@@ -326,35 +327,36 @@ def export_csv(conn, f, sort=None, cols=None):
 def summary(conn, f, filter_text):
     r = analyse(conn, f)
     L = []
+    _ = i18n.t
     p = r["period"]
-    L.append("Brennweiten-Auswertung (KB-Äquivalent), Filter: %s" % filter_text)
-    L.append("Bilder: %d (Duplikate entfernt), mit Brennweite: %d, Zeitraum %s bis %s"
+    L.append(_("Brennweiten-Auswertung (KB-Äquivalent), Filter: %s") % filter_text)
+    L.append(_("Bilder: %d (Duplikate entfernt), mit Brennweite: %d, Zeitraum %s bis %s")
              % (r["n_total"], r["n_kb"], p[0] if p else "-", p[1] if p else "-"))
-    L.append("Kameras: " + ", ".join("%s %d" % (c["camera"], c["n"]) for c in r["camera_counts"]))
-    L.append("Median-Brennweite: %s mm" % fmt(r["median"]))
+    L.append(_("Kameras: ") + ", ".join("%s %d" % (c["camera"], c["n"]) for c in r["camera_counts"]))
+    L.append(_("Median-Brennweite: %s mm") % fmt(r["median"]))
     cl = r["classes"]
-    L.append("Klassen (mm): " + " | ".join("%s: %s%%" % (c["label"], fmt(c["pct"])) for c in cl[:6]))
-    L.append("Klassen (mm): " + " | ".join("%s: %s%%" % (c["label"], fmt(c["pct"])) for c in cl[6:]))
+    L.append(_("Klassen (mm): ") + " | ".join("%s: %s%%" % (_(c["label"]), fmt(c["pct"])) for c in cl[:6]))
+    L.append(_("Klassen (mm): ") + " | ".join("%s: %s%%" % (_(c["label"]), fmt(c["pct"])) for c in cl[6:]))
     u = r["uww"]
-    L.append("Unter 24 mm: %d (%s%%), unter 20 mm: %d (%s%%)"
+    L.append(_("Unter 24 mm: %d (%s%%), unter 20 mm: %d (%s%%)")
              % (u["u24"], fmt(u["u24_pct"]), u["u20"], fmt(u["u20_pct"])))
     if r["uww_year"]:
-        L.append("Unter 24 mm je Jahr: " + ", ".join(
+        L.append(_("Unter 24 mm je Jahr: ") + ", ".join(
             "%d %s%%" % (y["year"], fmt(y["u24_pct"])) for y in r["uww_year"][-8:]))
     a = r["around"]
-    L.append("Um 50 mm (45–55): %d (%s%%), um 85 mm (80–90): %d (%s%%)"
+    L.append(_("Um 50 mm (45–55): %d (%s%%), um 85 mm (80–90): %d (%s%%)")
              % (a["n50"], fmt(a["p50"]), a["n85"], fmt(a["p85"])))
-    L.append("Objektive (Anteil): " + ", ".join(
-        "%s %s%%" % (x["lens"], fmt(x["pct"])) for x in r["lens_counts"][:6]))
+    L.append(_("Objektive (Anteil): ") + ", ".join(
+        "%s %s%%" % (_(x["lens"]), fmt(x["pct"])) for x in r["lens_counts"][:6]))
     for z in r["zooms"][:4]:
-        L.append("Zoom %s (%d Bilder): %g–%g mm %s%%, %g–%g mm %s%%"
-                 % (z["lens"], z["n"], z["min"], z["wide_to"], fmt(z["wide_pct"]),
+        L.append(_("Zoom %s (%d Bilder): %g–%g mm %s%%, %g–%g mm %s%%")
+                 % (_(z["lens"]), z["n"], z["min"], z["wide_to"], fmt(z["wide_pct"]),
                     z["tele_from"], z["max"], fmt(z["tele_pct"])))
     for x in [x for x in r["lowlight"] if x["n_known"]][:5]:
-        L.append("Offenblende + ISO>3200, %s: %d von %d (%s%%); Offenblende gesamt %s%%"
-                 % (x["lens"], x["both"], x["n_known"], fmt(x["both_pct"]), fmt(x["wo_pct"])))
+        L.append(_("Offenblende + ISO>3200, %s: %d von %d (%s%%); Offenblende gesamt %s%%")
+                 % (_(x["lens"]), x["both"], x["n_known"], fmt(x["both_pct"]), fmt(x["wo_pct"])))
     for y in r["years"][-4:]:
-        L.append("%d: %d Bilder, Median %s mm, " % (y["year"], y["n"], fmt(y["median"])) + ", ".join(
-            "%s %s%%" % (g["label"], fmt(g["pct"])) for g in y["groups"]))
-    L.append("Bewertet: %s%% der Bilder, davon ≥3 Sterne: %d" % (fmt(r["rated_pct"]), r["good_n"]))
+        L.append(_("%d: %d Bilder, Median %s mm, ") % (y["year"], y["n"], fmt(y["median"])) + ", ".join(
+            "%s %s%%" % (_(g["label"]), fmt(g["pct"])) for g in y["groups"]))
+    L.append(_("Bewertet: %s%% der Bilder, davon ≥3 Sterne: %d") % (fmt(r["rated_pct"]), r["good_n"]))
     return "\n".join(L[:25])

@@ -1,27 +1,27 @@
-name: Fehler melden
-description: Etwas funktioniert nicht oder wird falsch ausgewertet
+name: Fehler melden / Report a bug
+description: Etwas funktioniert nicht oder wird falsch ausgewertet / Something is broken or analyzed incorrectly
 labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: "Bitte keine privaten Fotos, Datenbanken, Seriennummern oder vollständigen Dateipfade hochladen."
+      value: "Bitte keine privaten Fotos, Datenbanken, Seriennummern oder vollständigen Dateipfade hochladen. / Please do not upload private photos, databases, serial numbers or full file paths."
   - type: textarea
     id: was
     attributes:
-      label: Was ist passiert, und was hättest du erwartet?
+      label: Was ist passiert, und was hättest du erwartet? / What happened, and what did you expect?
     validations:
       required: true
   - type: textarea
     id: schritte
     attributes:
-      label: Schritte zum Nachstellen
+      label: Schritte zum Nachstellen / Steps to reproduce
   - type: input
     id: system
     attributes:
-      label: App-Version, macOS-Version, Apple Silicon oder Intel
+      label: App-Version, macOS-Version, Apple Silicon oder Intel / App version, macOS version, Apple silicon or Intel
     validations:
       required: true
   - type: input
     id: ausruestung
     attributes:
-      label: Kamera und Objektiv, falls relevant
+      label: Kamera und Objektiv, falls relevant / Camera and lens, if relevant

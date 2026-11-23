@@ -11,6 +11,11 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
     var buffer = Data()
     var targets: [ObjectIdentifier: URL] = [:]
     let res = Bundle.main.resourceURL!
+    var lang: String = {
+        if let s = UserDefaults.standard.string(forKey: "lang"), s == "de" || s == "en" { return s }
+        return (Locale.preferredLanguages.first ?? "en").lowercased().hasPrefix("de") ? "de" : "en"
+    }()
+    func t(_ de: String, _ en: String) -> String { lang == "en" ? en : de }
 
     lazy var dataDir: URL = {
         if let d = ProcessInfo.processInfo.environment["BRENNWEITEN_DATA"] { return URL(fileURLWithPath: d) }
@@ -54,23 +59,23 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
         let path = Bundle.main.bundlePath
         let notarized = Bundle.main.object(forInfoDictionaryKey: "BWNotarized") as? Bool ?? false
         if !notarized && (path.contains("/AppTranslocation/") || !FileManager.default.isWritableFile(atPath: path)) {
-            fail("Bitte in „Programme“ verschieben", "Ziehe Brennweiten in den Ordner Programme und starte es dort erneut.")
+            fail(t("Bitte in „Programme“ verschieben", "Please move to Applications"), t("Ziehe Brennweiten in den Ordner Programme und starte es dort erneut.", "Drag Brennweiten to the Applications folder and open it from there."))
             return false
         }
         guard FileManager.default.isExecutableFile(atPath: pythonPath) else {
-            fail("App unvollständig", "Der eingebaute Programmteil wurde nicht gefunden. Bitte Brennweiten neu installieren.")
+            fail(t("App unvollständig", "App incomplete"), t("Der eingebaute Programmteil wurde nicht gefunden. Bitte Brennweiten neu installieren.", "A bundled component was not found. Please reinstall Brennweiten."))
             return false
         }
         guard FileManager.default.isExecutableFile(atPath: "/usr/bin/perl") else {
-            fail("Perl fehlt", "Das Auslesen der Fotos braucht das in macOS enthaltene Perl.")
+            fail(t("Perl fehlt", "Perl is missing"), t("Das Auslesen der Fotos braucht das in macOS enthaltene Perl.", "Reading photos requires the Perl included with macOS."))
             return false
         }
         if !notarized && getxattr(pythonPath, "com.apple.quarantine", nil, 0, 0, 0) >= 0 {
             let a = NSAlert()
-            a.messageText = "Eingebaute Programmteile freigeben?"
-            a.informativeText = "Brennweiten enthält Python und ExifTool. Die Freigabe gilt nur für diese App. Deine Fotos werden nur gelesen."
-            a.addButton(withTitle: "Freigeben")
-            a.addButton(withTitle: "Abbrechen")
+            a.messageText = t("Eingebaute Programmteile freigeben?", "Allow bundled components?")
+            a.informativeText = t("Brennweiten enthält Python und ExifTool. Die Freigabe gilt nur für diese App. Deine Fotos werden nur gelesen.", "Brennweiten includes Python and ExifTool. This permission applies to this app only. Your photos are only read.")
+            a.addButton(withTitle: t("Freigeben", "Allow"))
+            a.addButton(withTitle: t("Abbrechen", "Cancel"))
             guard a.runModal() == .alertFirstButtonReturn else { return false }
             let p = Process()
             p.executableURL = URL(fileURLWithPath: "/usr/bin/xattr")
@@ -78,7 +83,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
             try? p.run()
             p.waitUntilExit()
             if p.terminationStatus != 0 {
-                fail("Freigabe fehlgeschlagen", "Ziehe Brennweiten in den Ordner Programme und starte es dort erneut.")
+                fail(t("Freigabe fehlgeschlagen", "Permission failed"), t("Ziehe Brennweiten in den Ordner Programme und starte es dort erneut.", "Drag Brennweiten to the Applications folder and open it from there."))
                 return false
             }
         }
@@ -117,7 +122,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
         p.terminationHandler = { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self = self, !self.quitting else { return }
-                self.fail("Brennweiten wurde unerwartet beendet", "Details stehen in \(logURL.path).")
+                self.fail(self.t("Brennweiten wurde unerwartet beendet", "Brennweiten quit unexpectedly"), self.t("Details stehen in \(logURL.path).", "Details are in \(logURL.path)."))
                 self.quitting = true
                 NSApp.terminate(nil)
             }
@@ -126,7 +131,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
             try p.run()
             server = p
         } catch {
-            fail("Brennweiten startet nicht", error.localizedDescription)
+            fail(t("Brennweiten startet nicht", "Brennweiten cannot start"), error.localizedDescription)
             quitting = true
             NSApp.terminate(nil)
         }
@@ -158,6 +163,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
 
     func buildWindow() {
         let cfg = WKWebViewConfiguration()
+        cfg.userContentController.addUserScript(WKUserScript(source: "window.BW_NATIVE_LANG='\(lang)';", injectionTime: .atDocumentStart, forMainFrameOnly: true))
         cfg.userContentController.addScriptMessageHandler(self, contentWorld: .page, name: "native")
         web = WKWebView(frame: .zero, configuration: cfg)
         web.navigationDelegate = self
@@ -191,29 +197,30 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
             bar.addItem(top)
             return menu
         }
-        let hide = item("Andere ausblenden", #selector(NSApplication.hideOtherApplications(_:)), "h")
+        let hide = item(t("Andere ausblenden", "Hide Others"), #selector(NSApplication.hideOtherApplications(_:)), "h")
         hide.keyEquivalentModifierMask = [.command, .option]
         _ = add("Brennweiten", [
-            item("Über Brennweiten", #selector(NSApplication.orderFrontStandardAboutPanel(_:))), .separator(),
-            item("Brennweiten ausblenden", #selector(NSApplication.hide(_:)), "h"), hide, .separator(),
-            item("Brennweiten beenden", #selector(NSApplication.terminate(_:)), "q")])
-        let redo = item("Wiederholen", Selector(("redo:")), "z")
+            item(t("Über Brennweiten", "About Brennweiten"), #selector(NSApplication.orderFrontStandardAboutPanel(_:))), .separator(),
+            item(t("Brennweiten ausblenden", "Hide Brennweiten"), #selector(NSApplication.hide(_:)), "h"), hide, .separator(),
+            item(t("Brennweiten beenden", "Quit Brennweiten"), #selector(NSApplication.terminate(_:)), "q")])
+        let redo = item(t("Wiederholen", "Redo"), Selector(("redo:")), "z")
         redo.keyEquivalentModifierMask = [.command, .shift]
-        _ = add("Bearbeiten", [
-            item("Widerrufen", Selector(("undo:")), "z"), redo, .separator(),
-            item("Ausschneiden", #selector(NSText.cut(_:)), "x"), item("Kopieren", #selector(NSText.copy(_:)), "c"),
-            item("Einsetzen", #selector(NSText.paste(_:)), "v"), item("Alles auswählen", #selector(NSText.selectAll(_:)), "a")])
-        let tabs = ["Übersicht", "Objektive", "Kameras", "Fototage", "Tabelle", "Objektiv prüfen", "Vergleich", "Kameras & Objektive verwalten", "Datenqualität"]
-        _ = add("Ansicht", tabs.enumerated().map { i, t in item(t, #selector(showSection(_:)), String(i + 1), target: self, tag: i) })
-        let win = add("Fenster", [
-            item("Im Dock ablegen", #selector(NSWindow.performMiniaturize(_:)), "m"),
-            item("Zoomen", #selector(NSWindow.performZoom(_:))),
-            item("Schließen", #selector(NSWindow.performClose(_:)), "w")])
+        _ = add(t("Bearbeiten", "Edit"), [
+            item(t("Widerrufen", "Undo"), Selector(("undo:")), "z"), redo, .separator(),
+            item(t("Ausschneiden", "Cut"), #selector(NSText.cut(_:)), "x"), item(t("Kopieren", "Copy"), #selector(NSText.copy(_:)), "c"),
+            item(t("Einsetzen", "Paste"), #selector(NSText.paste(_:)), "v"), item(t("Alles auswählen", "Select All"), #selector(NSText.selectAll(_:)), "a")])
+        let tabs = lang == "en" ? ["Overview", "Lenses", "Cameras", "Shooting Days", "Table", "Check a Lens", "Compare", "Manage Cameras & Lenses", "Data Quality"]
+            : ["Übersicht", "Objektive", "Kameras", "Fototage", "Tabelle", "Objektiv prüfen", "Vergleich", "Kameras & Objektive verwalten", "Datenqualität"]
+        _ = add(t("Ansicht", "View"), tabs.enumerated().map { i, t in item(t, #selector(showSection(_:)), String(i + 1), target: self, tag: i) })
+        let win = add(t("Fenster", "Window"), [
+            item(t("Im Dock ablegen", "Minimize"), #selector(NSWindow.performMiniaturize(_:)), "m"),
+            item(t("Zoomen", "Zoom"), #selector(NSWindow.performZoom(_:))),
+            item(t("Schließen", "Close"), #selector(NSWindow.performClose(_:)), "w")])
         NSApp.windowsMenu = win
-        let help = add("Hilfe", [
-            item("Anleitung", #selector(openGuide), target: self),
-            item("Datenordner im Finder zeigen", #selector(openData), target: self),
-            item("Lizenzen", #selector(openLicenses), target: self)])
+        let help = add(t("Hilfe", "Help"), [
+            item(t("Anleitung", "Guide"), #selector(openGuide), target: self),
+            item(t("Datenordner im Finder zeigen", "Show Data Folder in Finder"), #selector(openData), target: self),
+            item(t("Lizenzen", "Licenses"), #selector(openLicenses), target: self)])
         NSApp.helpMenu = help
         NSApp.mainMenu = bar
     }
@@ -222,7 +229,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
         let ids = ["auswertung", "objektiv", "kamera", "fototage", "tabelle", "pruefen", "vergleich", "stamm", "qualitaet"]
         web.evaluateJavaScript("document.body.classList.contains('first') || showTab('\(ids[s.tag])')", completionHandler: nil)
     }
-    @objc func openGuide() { NSWorkspace.shared.open(res.appendingPathComponent("Anleitung.txt")) }
+    @objc func openGuide() { NSWorkspace.shared.open(res.appendingPathComponent(lang == "en" ? "Guide.txt" : "Anleitung.txt")) }
     @objc func openLicenses() { NSWorkspace.shared.open(res.appendingPathComponent("runtime/LIZENZEN.txt")) }
     @objc func openData() { NSWorkspace.shared.activateFileViewerSelecting([dataDir]) }
 
@@ -238,11 +245,17 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
             p.canChooseDirectories = true
             p.canChooseFiles = false
             p.allowsMultipleSelection = true
-            p.prompt = "Auswählen"
-            p.message = "Fotoordner auswählen (mehrere mit ⌘-Klick)"
+            p.prompt = t("Auswählen", "Choose")
+            p.message = t("Fotoordner auswählen (mehrere mit ⌘-Klick)", "Choose photo folders (⌘-click for several)")
             p.beginSheetModal(for: window) { r in
                 replyHandler(r == .OK ? p.urls.map { $0.path } : [String](), nil)
             }
+        case "lang":
+            if let l = b["lang"] as? String, l == "de" || l == "en" {
+                if (b["save"] as? Bool) != false { UserDefaults.standard.set(l, forKey: "lang") }
+                if l != lang { lang = l; buildMenu() }
+            }
+            replyHandler(true, nil)
         case "copy":
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(b["text"] as? String ?? "", forType: .string)
@@ -302,7 +315,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
         let a = NSAlert()
         a.messageText = m
         a.addButton(withTitle: "OK")
-        a.addButton(withTitle: "Abbrechen")
+        a.addButton(withTitle: t("Abbrechen", "Cancel"))
         a.beginSheetModal(for: window) { completionHandler($0 == .alertFirstButtonReturn) }
     }
 
@@ -311,7 +324,7 @@ final class App: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDele
         let a = NSAlert()
         a.messageText = m
         a.addButton(withTitle: "OK")
-        a.addButton(withTitle: "Abbrechen")
+        a.addButton(withTitle: self.t("Abbrechen", "Cancel"))
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 280, height: 24))
         field.stringValue = t ?? ""
         a.accessoryView = field

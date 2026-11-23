@@ -394,7 +394,7 @@ async function loadCompare() {
     return { cameras: c ? [c] : [], lenses: l ? [l] : [], from: $(`#c-${s}-from`).value, to: $(`#c-${s}-to`).value };
   };
   const r = await api("/api/compare", { qs: qs(), a: side("a"), b: side("b") });
-  const label = (s) => cmpMode === "lens" ? ($(`#c-${s}-lens`).selectedOptions[0] || {}).textContent?.replace(/ \([\d.]+\)$/, "") || s.toUpperCase() :
+  const label = (s) => cmpMode === "lens" ? ($(`#c-${s}-lens`).selectedOptions[0] || {}).textContent?.replace(/ \([\d.,]+\)$/, "") || s.toUpperCase() :
     cmpMode === "camera" ? ($(`#c-${s}-cam`).selectedOptions[0] || {}).textContent || s.toUpperCase() : `${$(`#c-${s}-from`).value ? dateDE($(`#c-${s}-from`).value) : "Anfang"} – ${$(`#c-${s}-to`).value ? dateDE($(`#c-${s}-to`).value) : "heute"}`;
   const A = label("a"), B = label("b");
   const dcell = (d) => `<td class="num ${d > 0 ? "pos" : d < 0 ? "neg" : ""}">${pp(d)}</td>`;

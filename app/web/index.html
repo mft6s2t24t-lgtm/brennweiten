@@ -27,6 +27,7 @@
   </nav>
   <div class="side-foot">
     <div class="scanpill" id="scanpill" hidden></div>
+    <div class="langs" role="group" aria-label="Sprache"><button data-lang="de">Deutsch</button><button data-lang="en">English</button></div>
     <button class="ghost" id="quit" title="Programm beenden">Beenden</button>
   </div>
 </aside>
@@ -238,8 +239,7 @@
 <section id="tab-ordner" class="tab">
   <article class="card">
     <h2 data-i="folders">Fotoordner</h2>
-    <p class="muted">Die Fotos werden nur gelesen – nie verändert, verschoben oder umbenannt.
-      Ist ein Laufwerk (NAS, SSD) nicht verbunden, bleiben die bisherigen Daten erhalten.</p>
+    <p class="muted">Die Fotos werden nur gelesen – nie verändert, verschoben oder umbenannt. Ist ein Laufwerk (NAS, SSD) nicht verbunden, bleiben die bisherigen Daten erhalten.</p>
     <div id="folders"></div>
     <div class="actions">
       <button id="folder-choose">Ordner hinzufügen …</button>
@@ -280,6 +280,8 @@
       <label>ISO ab <input type="number" id="r-iso"></label><label>Blende bis f/ <input type="number" step="0.1" id="r-f"></label><button class="ghost" id="r-add">Hinzufügen</button></div></div></div>
   <div class="actions"><button class="ghost" id="td-default">Standard wiederherstellen</button></div></dialog>
 <dialog id="photo"><div class="ph-body"><img id="ph-img" alt=""><div id="ph-meta"></div></div></dialog>
+<script src="/api/i18n.js"></script>
+<script src="/web/i18n.js"></script>
 <script src="/web/app.js"></script>
 <script src="/web/extras.js"></script>
 <script src="/web/pages.js"></script>

@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analyse  # noqa: E402
 import db  # noqa: E402
 import features  # noqa: E402
+import i18n  # noqa: E402
 import insights  # noqa: E402
 import report  # noqa: E402
 import scanner  # noqa: E402
@@ -68,19 +69,19 @@ def filter_text(f):
     c = conn()
     if f["cameras"]:
         names = {r["key"]: r["name"] for r in c.execute("SELECT key,name FROM cameras")}
-        parts.append("Kameras " + ", ".join(names.get(k, k) for k in f["cameras"]))
+        parts.append(("Cameras " if i18n.lang() == "en" else "Kameras ") + ", ".join(names.get(k, k) for k in f["cameras"]))
     else:
-        parts.append("alle ausgewählten Kameras")
+        parts.append(i18n.t("alle ausgewählten Kameras"))
     if f["lenses"]:
-        parts.append("Objektive " + ", ".join(f["lenses"]))
+        parts.append(("Lenses " if i18n.lang() == "en" else "Objektive ") + ", ".join(f["lenses"]))
     if f["from"] or f["to"]:
-        parts.append("Zeitraum %s bis %s" % (f["from"] or "Anfang", f["to"] or "heute"))
+        parts.append(("Period %s to %s" if i18n.lang() == "en" else "Zeitraum %s bis %s") % (f["from"] or i18n.t("Anfang"), f["to"] or i18n.t("heute")))
     if f["good"]:
-        parts.append("nur ≥ 3 Sterne")
+        parts.append(i18n.t("nur ≥ 3 Sterne"))
     labels = {k: l for k, l, _ in tabelle.COLUMNS}
-    active = [labels[k] for k, v in (f.get("cf") or {}).items() if k in labels and v]
+    active = [i18n.t(labels[k]) for k, v in (f.get("cf") or {}).items() if k in labels and v]
     if active:
-        parts.append("Spaltenfilter: " + ", ".join(active))
+        parts.append(("Column filters: " if i18n.lang() == "en" else "Spaltenfilter: ") + ", ".join(active))
     return "; ".join(parts)
 
 
@@ -231,12 +232,19 @@ class H(BaseHTTPRequestHandler):
             return self.send(403, {"error": "forbidden"})
         u = urlparse(self.path)
         q = parse_qs(u.query)
+        i18n.use(q.get("lang", ["de"])[0])
         p = u.path
         try:
             if p in ("/", "/index.html"):
                 return self.static("index.html")
             if p.startswith("/web/"):
                 return self.static(p[5:])
+            if p == "/api/i18n.js":
+                with open(i18n.PATH, encoding="utf-8") as fh:
+                    words = fh.read()
+                with CONN_LOCK:
+                    saved = db.get_setting(conn(), "lang", "")
+                return self.send(200, "window.BW_SAVED_LANG=%s;window.BW_EN=%s;" % (json.dumps(saved), words.replace("</", "<\\/")), "text/javascript; charset=utf-8")
             if p == "/api/ping":
                 return self.send(200, {"app": "brennweiten", "code": os.path.dirname(os.path.abspath(__file__))})
             if p == "/api/status":
@@ -315,7 +323,7 @@ class H(BaseHTTPRequestHandler):
                     return self.send(200, [{"id": r["id"], "name": r["name"], "state": json.loads(r["state"])}
                                            for r in conn().execute("SELECT * FROM views ORDER BY name")])
             if p == "/api/settings":
-                return self.send(200, {"auto_scan": auto_enabled()})
+                return self.send(200, {"auto_scan": auto_enabled(), "lang": db.get_setting(conn(), "lang", "")})
             if p.startswith("/thumb/"):
                 with CONN_LOCK:
                     r = conn().execute("SELECT path,size,mtime,ext FROM images WHERE id=?", (int(p[7:]),)).fetchone()
@@ -330,7 +338,7 @@ class H(BaseHTTPRequestHandler):
                 f = filters_from(q)
                 with CONN_LOCK:
                     data = report.build(conn(), f, filter_text(f))
-                name = "brennweiten_bericht_%s.pdf" % datetime.now().strftime("%Y-%m-%d")
+                name = ("brennweiten_report_%s.pdf" if i18n.lang() == "en" else "brennweiten_bericht_%s.pdf") % datetime.now().strftime("%Y-%m-%d")
                 return self.send(200, data, "application/pdf",
                                  {"Content-Disposition": 'attachment; filename="%s"' % name})
             if p == "/api/summary":
@@ -354,6 +362,7 @@ class H(BaseHTTPRequestHandler):
         p = urlparse(self.path).path
         try:
             b = self.body()
+            i18n.use(parse_qs(b.get("qs") or "").get("lang", ["de"])[0] if isinstance(b, dict) else "de")
             c = conn()
             if p == "/api/folders/choose":
                 msgs = [m for m in (add_folder(x) for x in choose_folders()) if m]
@@ -448,7 +457,10 @@ class H(BaseHTTPRequestHandler):
                 return self.send(200, {"ok": True})
             if p == "/api/settings":
                 with CONN_LOCK:
-                    db.set_setting(c, "auto_scan", "1" if b.get("auto_scan") else "0")
+                    if "auto_scan" in b:
+                        db.set_setting(c, "auto_scan", "1" if b.get("auto_scan") else "0")
+                    if b.get("lang") in ("de", "en"):
+                        db.set_setting(c, "lang", b["lang"])
                 return self.send(200, {"ok": True})
             if p == "/api/quit":
                 self.send(200, {"ok": True})
