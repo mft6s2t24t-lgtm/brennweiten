@@ -1,0 +1,36 @@
+# Private Daten: niemals veröffentlichen
+daten/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+vorschau/
+protokoll.txt
+.env
+.env.*
+
+# Eigene Fotos
+*.NEF
+*.nef
+*.NRW
+*.CR2
+*.CR3
+*.DNG
+*.dng
+*.HEIC
+*.heic
+*.xmp
+
+# Erzeugte Dateien
+dist/
+test/testfotos/
+__pycache__/
+*.pyc
+*.dmg
+*.zip
+
+# Systemdateien und Werkzeuge
+.DS_Store
+.claude/
+.vscode/
+.idea/

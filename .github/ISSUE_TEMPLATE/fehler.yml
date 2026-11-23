@@ -1,0 +1,27 @@
+name: Fehler melden
+description: Etwas funktioniert nicht oder wird falsch ausgewertet
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Bitte keine privaten Fotos, Datenbanken, Seriennummern oder vollständigen Dateipfade hochladen."
+  - type: textarea
+    id: was
+    attributes:
+      label: Was ist passiert, und was hättest du erwartet?
+    validations:
+      required: true
+  - type: textarea
+    id: schritte
+    attributes:
+      label: Schritte zum Nachstellen
+  - type: input
+    id: system
+    attributes:
+      label: App-Version, macOS-Version, Apple Silicon oder Intel
+    validations:
+      required: true
+  - type: input
+    id: ausruestung
+    attributes:
+      label: Kamera und Objektiv, falls relevant

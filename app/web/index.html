@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brennweiten</title>
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<div class="shell">
+<aside class="side">
+  <h1>Brennweiten</h1>
+  <nav class="tabs" aria-label="Bereiche">
+    <span class="navlabel">Analyse</span>
+    <button data-tab="auswertung" class="active">Übersicht</button>
+    <button data-tab="objektiv">Objektive</button>
+    <button data-tab="kamera">Kameras</button>
+    <button data-tab="fototage">Fototage</button>
+    <button data-tab="tabelle">Tabelle</button>
+    <span class="navlabel">Entscheiden</span>
+    <button data-tab="pruefen">Objektiv prüfen</button>
+    <button data-tab="vergleich">Vergleich</button>
+    <span class="navlabel">Verwaltung</span>
+    <button data-tab="stamm">Kameras &amp; Objektive</button>
+    <button data-tab="qualitaet">Datenqualität</button>
+    <button data-tab="ordner">Ordner &amp; Einlesen</button>
+  </nav>
+  <div class="side-foot">
+    <div class="scanpill" id="scanpill" hidden></div>
+    <button class="ghost" id="quit" title="Programm beenden">Beenden</button>
+  </div>
+</aside>
+<main>
+  <section id="welcome" hidden>
+    <div class="welcome-card">
+      <h2>Welche Brennweiten nutzt du wirklich?</h2>
+      <p>Wähle deine Fotoordner. Brennweiten liest Kamera, Objektiv und Aufnahmedaten aus den Dateien und zeigt dir, wie du fotografierst.</p>
+      <button id="w-choose" class="big">Fotoordner wählen</button>
+      <div id="w-progress" hidden><div class="bar"><div class="fill" id="w-fill"></div></div><div class="muted" id="w-text"></div></div>
+      <div id="w-msg" class="hint" hidden></div>
+      <ul class="promises">
+        <li><b>Nur lesen</b> Deine Fotos werden nie verändert, verschoben oder umbenannt.</li>
+        <li><b>Nur auf deinem Mac</b> Alles läuft lokal und ohne Internet.</li>
+        <li><b>Jede Kamera</b> Modelle und Sensorgröße kommen aus den Bilddateien.</li>
+      </ul>
+    </div>
+  </section>
+  <div class="filters" id="filterbar">
+    <details class="multi" data-i="f_cams" id="f-cams"><summary>Kameras: alle</summary><div class="list"></div></details>
+    <details class="multi" data-i="f_lenses" id="f-lenses"><summary>Objektive: alle</summary><div class="list"></div></details>
+    <label data-i="f_range">von <input type="date" id="f-from"></label>
+    <label>bis <input type="date" id="f-to"></label>
+    <label class="check" data-i="f_good"><input type="checkbox" id="f-good"> ab 3 Sternen</label>
+    <button class="ghost" id="f-reset" hidden>Zurücksetzen</button>
+    <span class="spacer"></span>
+    <details class="multi menu" data-i="f_views" id="f-views"><summary>Ansichten</summary><div class="list right pad">
+      <label class="stack-l">Gespeicherte Ansicht <select id="view-select"><option value="">–</option></select></label>
+      <button class="ghost" id="view-save">Aktuelle Ansicht speichern …</button>
+      <button class="ghost" id="view-del" hidden>Ansicht löschen</button>
+    </div></details>
+    <details class="multi menu" data-i="f_export" id="f-export"><summary>Exportieren</summary><div class="list right pad">
+      <button class="ghost" id="copy">Zusammenfassung kopieren</button>
+      <button class="ghost" id="pdf">PDF-Bericht sichern …</button>
+      <button class="ghost" id="csv">CSV für Excel sichern …</button>
+    </div></details>
+  </div>
+  <div class="chips" id="chips" hidden></div>
+<!-- ============ Auswertung ============ -->
+<section id="tab-auswertung" class="tab active">
+  <div id="hint" class="hint" hidden></div>
+  <div id="empty" class="empty" hidden></div>
+  <div id="results">
+    <div class="tiles-head"><h2 data-i="tiles">Auf einen Blick</h2><button class="ghost small" id="tiles-edit">Kennzahlen anpassen</button></div>
+    <div class="tiles" id="tiles"></div>
+    
+
+    <article class="card" id="sec-classes">
+      <h2 data-i="classes">Verteilung nach Brennweitenklassen <small>KB-Äquivalent</small></h2>
+      <div id="chart-classes" class="chart"></div>
+      <h3 data-i="hist">Feines Histogramm <small>Bilder je Millimeter, logarithmische Achse</small></h3>
+      <div id="chart-hist" class="chart"></div>
+    </article>
+
+    <article class="card" id="sec-lenses">
+      <h2 data-i="top_lenses">Meistgenutzte Objektive</h2>
+      <div id="lens-counts"></div>
+    </article>
+    <article class="card" id="sec-years">
+      <h2 data-i="years">Entwicklung pro Jahr</h2>
+      <div class="legend" id="year-legend"></div>
+      <div id="chart-years" class="chart"></div>
+      <div id="years-table"></div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ Tabelle ============ -->
+<section id="tab-tabelle" class="tab">
+  <div class="tbl-bar">
+    <span id="t-stats" aria-live="polite"></span>
+    <span class="spacer"></span>
+    <span class="muted" data-i="table">So bedienst du die Tabelle</span>
+    <details class="multi" data-i="t_cols" id="t-cols"><summary>Spalten</summary><div class="list right"></div></details>
+    <button class="ghost" id="t-reset">Sortierung und Spaltenfilter löschen</button>
+  </div>
+  <div class="grid-wrap" id="t-wrap"><table class="grid" id="t-grid"><thead></thead><tbody></tbody></table>
+    <div class="grid-more muted" id="t-more"></div></div>
+</section>
+
+<!-- ============ Objektive ============ -->
+<section id="tab-objektiv" class="tab">
+  <div class="pick"><label data-i="pick_lens">Objektiv <select id="ol-select"></select></label><button class="ghost" id="ol-back" hidden>Zur Rangliste</button></div>
+  <div id="ol-empty" class="empty" hidden>Keine Fotos für diesen Filter.</div>
+  <div id="ol-body">
+    <article class="card" id="ol-rank-card"><h2 data-i="lens_rank">Alle Objektive <small>Klick auf einen Namen öffnet die Detailanalyse</small></h2><div id="ol-rank"></div></article>
+    <div id="ol-detail" hidden></div>
+    <article class="card" id="detail-card">
+      <h2 data-i="detail">Brennweite und Blende <small>Wie viele Fotos bei welcher Brennweite und Blende?</small></h2>
+      <div class="detail-controls">
+        <label>Objektiv <select id="d-lens"></select></label>
+        <label data-i="d_fl">Brennweite <span class="unit"><input type="text" inputmode="numeric" id="d-fl" placeholder="alle" list="d-fl-list"> mm</span><datalist id="d-fl-list"></datalist></label>
+        <label data-i="d_fnum">Blende <span class="unit">f/<input type="text" inputmode="decimal" id="d-fnum" placeholder="alle" list="d-fnum-list"></span><datalist id="d-fnum-list"></datalist></label>
+        <label data-i="d_basis">Brennweite als <select id="d-basis"><option value="kb">KB-Äquivalent</option><option value="objektiv">am Objektiv</option></select></label>
+        <button class="ghost" id="d-clear">Auswahl löschen</button>
+      </div>
+      <p class="detail-result" id="d-result" aria-live="polite"></p>
+      <div class="cols">
+        <div><h3>Fotos je Brennweite</h3><div class="detail-list" id="d-fls"></div></div>
+        <div><h3>Fotos je Blende</h3><div class="detail-list" id="d-fnums"></div></div>
+      </div>
+    </article>
+    <article class="card" id="sec-zoom">
+      <h2 data-i="zoom">Zoom am Anschlag <small>Anteil an kürzester und längster Brennweite (Brennweite am Objektiv)</small></h2>
+      <div class="legend"><span><i class="sw s-wide"></i>kurzes Ende</span><span><i class="sw s-mid"></i>dazwischen</span><span><i class="sw s-tele"></i>langes Ende</span></div>
+      <div id="zooms"></div>
+    </article>
+    <article class="card" id="sec-light">
+      <h2 data-i="lowlight">Offenblende bei wenig Licht <small>ISO über 3200</small></h2>
+      <div id="lowlight"></div>
+    </article>
+    <article class="card" id="sec-uww">
+      <h2 data-i="uww">Ultraweitwinkel <small>unter 24 mm und unter 20 mm KB</small></h2>
+      <div class="cols">
+        <div><h3>Nach Objektiv</h3><div id="uww-lens"></div></div>
+        <div><h3>Nach Jahr</h3><div id="uww-year"></div></div>
+      </div>
+    </article>
+    <article class="card" id="sec-around">
+      <h2 data-i="around">Nutzung um 50 mm und um 85 mm <small>KB, egal mit welchem Objektiv</small></h2>
+      <div class="cols">
+        <div><h3>Nach Objektiv</h3><div id="around-lens"></div></div>
+        <div><h3>Nach Jahr</h3><div id="around-year"></div></div>
+      </div>
+    </article>
+    <article class="card" id="sec-keep"><h2 data-i="keepers">Trefferquote <small>Anteil der Fotos mit mindestens 3 Sternen</small></h2><div id="k-hint" class="hint" hidden></div><div id="k-keep"></div></article>
+  </div>
+</section>
+
+<!-- ============ Kameras ============ -->
+<section id="tab-kamera" class="tab">
+  <div class="pick"><label data-i="pick_camera">Kamera <select id="cl-select"></select></label><button class="ghost" id="cl-back" hidden>Zur Rangliste</button></div>
+  <div id="cl-empty" class="empty" hidden>Keine Fotos für diesen Filter.</div>
+  <article class="card" id="cl-rank-card"><h2 data-i="camera_rank">Alle Kameras <small>Klick auf einen Namen öffnet die Detailanalyse</small></h2><div id="cl-rank"></div></article>
+  <div id="cl-detail" hidden></div>
+</section>
+
+<!-- ============ Objektiv prüfen ============ -->
+<section id="tab-pruefen" class="tab">
+  <article class="card">
+    <h2 data-i="check">Welches Objektiv interessiert dich?</h2>
+    <p class="muted">Trage bis zu drei Objektive ein. Die App zeigt, was sie für deine bisherigen Fotos bedeutet hätten. Sie gibt keine Kaufempfehlung.</p>
+    <div class="cand-grid" id="p-cands"></div>
+  </article>
+  <div class="hint" data-i="check_limit">Deine Fotos zeigen nur, was mit deiner bisherigen Ausrüstung möglich war. Brennweiten, die du nie besessen hast, tauchen in den Daten nicht auf.</div>
+  <div id="p-result"></div>
+</section>
+
+<!-- ============ Fototage ============ -->
+<section id="tab-fototage" class="tab">
+  <div class="tiles" id="d-tiles"></div>
+  <div id="dy-detail" hidden></div>
+  <article class="card" id="dy-list-card">
+    <h2 data-i="day_list">Alle Fototage <small>Klick auf ein Datum zeigt Kameras, Objektive und Einstellungen dieses Tages</small></h2>
+    <div id="dy-list"></div><div class="actions"><button class="ghost" id="dy-more" hidden>Mehr anzeigen</button><span class="muted" id="dy-count"></span></div>
+  </article>
+  <article class="card"><h2 data-i="trips">Reisen und Serien <small>mindestens 2 Tage in Folge</small></h2><div id="dy-trips"></div></article>
+  <article class="card">
+    <h2 data-i="day_lenses">Objektive pro Fototag</h2>
+    <div class="detail-controls"><label data-i="day_wide">Weitwinkel bis <span class="unit"><input type="number" id="dy-wide" value="28"> mm</span></label>
+      <label data-i="day_tele">Tele ab <span class="unit"><input type="number" id="dy-tele" value="100"> mm</span></label></div>
+    <div class="cols" style="margin-top:12px"><div><h3>Objektivwechsel am Tag</h3><div id="dy-dist"></div></div><div><h3>Objektive nach Fototagen</h3><div id="dy-lens"></div></div></div>
+  </article>
+  <article class="card"><h2 data-i="day_cameras">Kameras nach Fototagen</h2><div id="dy-cam"></div></article>
+</section>
+
+<!-- ============ Vergleich ============ -->
+<section id="tab-vergleich" class="tab">
+  <article class="card">
+    <h2 data-i="compare">Vergleichen</h2>
+    <div class="segmented" id="c-mode" role="group" aria-label="Was vergleichen?">
+      <button data-mode="lens">Objektive</button><button data-mode="camera">Kameras</button><button data-mode="time">Zeiträume</button>
+    </div>
+    <div class="cmp-form">
+      <fieldset><legend><i class="sw s-wide"></i>A</legend><label class="c-lens">Objektiv <select id="c-a-lens"></select></label><label class="c-cam">Kamera <select id="c-a-cam"></select></label><label>von <input type="date" id="c-a-from"></label><label>bis <input type="date" id="c-a-to"></label></fieldset>
+      <fieldset><legend><i class="sw s-tele"></i>B</legend><label class="c-lens">Objektiv <select id="c-b-lens"></select></label><label class="c-cam">Kamera <select id="c-b-cam"></select></label><label>von <input type="date" id="c-b-from"></label><label>bis <input type="date" id="c-b-to"></label></fieldset>
+    </div>
+    <div id="c-result"></div>
+  </article>
+</section>
+
+<!-- ============ Datenqualität ============ -->
+<section id="tab-qualitaet" class="tab">
+  <article class="card"><h2 data-i="quality">Datenqualität <small>Klick auf eine Zahl zeigt die Fotos</small></h2><div id="q-issues"></div></article>
+  <article class="card"><h2 data-i="quality_other">Crop-Faktoren und Ordner</h2><div id="q-other"></div></article>
+</section>
+
+<!-- ============ Kameras ============ -->
+<!-- ============ Objektive ============ -->
+<section id="tab-stamm" class="tab">
+  <article class="card">
+    <h2 data-i="cams">Gefundene Kameras</h2>
+        <div id="cams"></div>
+    <div class="actions"><button id="cams-save">Speichern</button><span id="cams-msg" class="muted"></span></div>
+  </article>
+  <article class="card" id="sugg-card">
+    <h2 data-i="sugg">Vorschläge zur Bestätigung</h2>
+        <div id="sugg"></div>
+  </article>
+  <article class="card">
+    <h2 data-i="lenses">Objektive</h2>
+        <div id="lenses"></div>
+    <div class="actions"><button id="lenses-save">Speichern</button><span id="lenses-msg" class="muted"></span></div>
+  </article>
+</section>
+
+<!-- ============ Ordner ============ -->
+<section id="tab-ordner" class="tab">
+  <article class="card">
+    <h2 data-i="folders">Fotoordner</h2>
+    <p class="muted">Die Fotos werden nur gelesen – nie verändert, verschoben oder umbenannt.
+      Ist ein Laufwerk (NAS, SSD) nicht verbunden, bleiben die bisherigen Daten erhalten.</p>
+    <div id="folders"></div>
+    <div class="actions">
+      <button id="folder-choose">Ordner hinzufügen …</button>
+      <input type="text" id="folder-path" placeholder="oder Pfad einfügen, z. B. /Volumes/Fotos">
+      <button class="ghost" id="folder-add">Pfad hinzufügen</button>
+    </div>
+    <div id="folder-msg" class="hint" hidden></div>
+  </article>
+  <article class="card">
+    <h2 data-i="scan">Einlesen</h2>
+    <p class="muted">Beim ersten Mal werden alle Bilder gelesen, danach nur neue oder geänderte Dateien.</p>
+    <label class="check" data-i="auto"><input type="checkbox" id="auto-scan"> Automatisch aktualisieren: beim Start und sobald ein Laufwerk verbunden wird</label>
+    <div class="actions">
+      <button id="scan">Jetzt einlesen</button>
+      <button class="ghost" id="scan-cancel" hidden>Abbrechen</button>
+    </div>
+    <div id="progress" hidden>
+      <div class="bar"><div class="fill" id="progress-fill"></div></div>
+      <div id="progress-text" class="muted"></div>
+    </div>
+    <pre id="log" class="log"></pre>
+    <details id="failed-box" hidden><summary>Nicht lesbare Dateien</summary><div id="failed"></div></details>
+  </article>
+</section>
+</main>
+</div>
+
+<div id="tip" class="tip" hidden></div>
+<div id="toast" class="toast" hidden></div>
+<div id="colmenu" class="colmenu" hidden></div>
+<dialog id="gal"><div class="gal-head"><h2 id="gal-title"></h2><span class="spacer"></span><button class="ghost" id="gal-close">Schließen</button></div>
+  <div class="gal-grid" id="gal-grid"></div><div class="actions"><button class="ghost" id="gal-more" hidden>Mehr laden</button><span class="muted" id="gal-count"></span></div></dialog>
+<dialog id="tiles-dlg"><div class="gal-head"><h2 data-i="tiles_edit">Kennzahlen anpassen</h2><span class="spacer"></span><button class="ghost" id="td-close">Schließen</button></div>
+  <div class="td-cols"><div><h3>Angezeigt <small id="td-count"></small></h3><div id="td-chosen"></div></div>
+  <div><h3>Verfügbar</h3><div id="td-lib"></div>
+    <h3 data-i="tile_rule">Eigene Kennzahl</h3><div class="rule-form"><input type="text" id="r-label" placeholder="Name, z. B. Reportage" aria-label="Name">
+      <label>Brennweite <span class="unit"><input type="number" id="r-min" placeholder="von" aria-label="von"> – <input type="number" id="r-max" placeholder="bis" aria-label="bis"> mm</span></label>
+      <label>ISO ab <input type="number" id="r-iso"></label><label>Blende bis f/ <input type="number" step="0.1" id="r-f"></label><button class="ghost" id="r-add">Hinzufügen</button></div></div></div>
+  <div class="actions"><button class="ghost" id="td-default">Standard wiederherstellen</button></div></dialog>
+<dialog id="photo"><div class="ph-body"><img id="ph-img" alt=""><div id="ph-meta"></div></div></dialog>
+<script src="/web/app.js"></script>
+<script src="/web/extras.js"></script>
+<script src="/web/pages.js"></script>
+</body>
+</html>

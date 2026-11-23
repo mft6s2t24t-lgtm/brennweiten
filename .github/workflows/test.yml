@@ -1,0 +1,22 @@
+name: Selbsttest
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ExifTool installieren
+        run: brew install exiftool
+      - name: Testbilder erzeugen
+        run: bash test/make_testfotos.sh
+      - name: Selbsttest
+        run: |
+          /usr/bin/python3 test/check.py | tee ergebnis.txt
+          grep -q "FEHLER: keine" ergebnis.txt
