@@ -1,3 +1,5 @@
+**Deutsch** · [English](#contributing)
+
 # Mitmachen
 
 Danke, dass du Brennweiten verbessern möchtest. Fehlerberichte, Ideen, Code-Reviews und Pull Requests sind willkommen, auf Deutsch oder Englisch.
@@ -37,3 +39,46 @@ bash test/make_testfotos.sh && python3 test/check.py
 ```
 
 Mit einem Beitrag stimmst du zu, dass er unter der [MIT-Lizenz](LICENSE) des Projekts veröffentlicht wird.
+
+---
+
+# Contributing
+
+Thanks for helping improve Brennweiten. Bug reports, ideas, code reviews and pull requests are welcome, in English or German.
+
+## Reporting bugs
+
+Open an [issue](../../issues) and include your macOS version, Mac type, app version, camera and lens.
+
+**Please do not upload private photos, databases or full file paths.** EXIF data can contain serial numbers, names and GPS positions. For detection problems, this output is usually enough:
+
+```bash
+exiftool -Make -Model -LensModel -LensID -FocalLength -FocalLengthIn35mmFormat -ScaleFactor35efl -FNumber -MaxApertureValue FILE
+```
+
+## Principles
+
+- Photos are only read and never changed.
+- The app works locally and sends no data to the internet.
+- It reports facts from your own photos, but makes no purchase recommendations.
+- The Python code uses only the standard library and stays compatible with Python 3.9.
+- The interface uses no frameworks or external files.
+- German text is the source. English translations live in `app/web/en.json`.
+
+## Local development
+
+```bash
+brew install exiftool
+```
+
+```bash
+cd app && BRENNWEITEN_DATA=/tmp/brennweiten-dev BRENNWEITEN_PORT=8792 python3 server.py
+```
+
+The interface then runs at <http://127.0.0.1:8792>. Please run the self-test before opening a pull request:
+
+```bash
+bash test/make_testfotos.sh && python3 test/check.py
+```
+
+By contributing, you agree that your contribution is published under the project's [MIT License](LICENSE).

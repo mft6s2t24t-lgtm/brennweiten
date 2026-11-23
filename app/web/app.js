@@ -2,9 +2,9 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const nf = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
+const nf = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
 const n = (v) => (v == null ? "–" : nf.format(v));
-const p = (v) => (v == null ? "–" : nf.format(v) + " %");
+const p = (v) => (v == null ? "–" : nf.format(v) + PCT);
 const SEP = "\x1f";
 
 async function api(path, body) {
@@ -78,6 +78,7 @@ function qs() {
   if (F.to) u.set("to", F.to);
   if (F.good) u.set("good", "1");
   if (F.cf && Object.keys(F.cf).length) u.set("cf", JSON.stringify(F.cf));
+  if (LANG === "en") u.set("lang", "en");
   return u.toString();
 }
 function saveFilter() { try { localStorage.setItem("filter", JSON.stringify(F)); } catch (e) {} }
@@ -120,7 +121,7 @@ function barChart(el, data, opt = {}) {
   const bw = (W - L - R) / data.length;
   const y = (v) => T + (H - T - B) * (1 - v / top);
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label || "")}">`;
-  for (let g = 0; g <= top; g += step) s += `<line class="gridl" x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}"/><text x="${L - 6}" y="${y(g) + 4}" text-anchor="end">${opt.pct ? g + " %" : n(g)}</text>`;
+  for (let g = 0; g <= top; g += step) s += `<line class="gridl" x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}"/><text x="${L - 6}" y="${y(g) + 4}" text-anchor="end">${opt.pct ? g + PCT : n(g)}</text>`;
   data.forEach((d, i) => {
     const x = L + i * bw, w = Math.max(2, bw - Math.max(4, bw * 0.28)), h = y(0) - y(d.v);
     const bx = x + (bw - w) / 2;
@@ -199,7 +200,7 @@ async function loadAnalysis() {
   $("#zooms").innerHTML = table([["Objektiv"], ["Bilder", "num"], ["kurzes Ende", "num"], ["langes Ende", "num"], ["Verteilung"]],
     r.zooms.map((z) => `<tr><td>${esc(z.lens)}${z.crops.some((c) => c !== 1) ? ' <span class="badge">an Crop-Kamera</span>' : ""}</td><td class="num">${n(z.n)}</td>
       <td class="num">${n(z.min)}–${n(z.wide_to)} mm: <b>${p(z.wide_pct)}</b></td><td class="num">${n(z.tele_from)}–${n(z.max)} mm: <b>${p(z.tele_pct)}</b></td>
-      <td><div class="stack" data-tip="${esc(z.lens)}<br>kurz ${p(z.wide_pct)} · dazwischen ${p(z.mid_pct)} · lang ${p(z.tele_pct)}"><span class="s-wide" style="width:${z.wide_pct}%"></span><span class="s-mid" style="width:${z.mid_pct}%"></span><span class="s-tele" style="width:${z.tele_pct}%"></span></div></td></tr>`));
+      <td><div class="stack" data-tip="${esc(esc(z.lens))}<br>kurz ${p(z.wide_pct)} · dazwischen ${p(z.mid_pct)} · lang ${p(z.tele_pct)}"><span class="s-wide" style="width:${z.wide_pct}%"></span><span class="s-mid" style="width:${z.mid_pct}%"></span><span class="s-tele" style="width:${z.tele_pct}%"></span></div></td></tr>`));
 
   $("#lowlight").innerHTML = table([["Objektiv"], ["Offenblende", "num"], ["Bilder", "num"], ["bei Offenblende", "num"], ["ISO > 3200", "num"], ["Offenblende <b>und</b> ISO > 3200", "num"], [""]],
     r.lowlight.map((x) => `<tr${x.n_known ? "" : ' class="off"'}><td>${esc(x.lens)}</td><td class="num">${x.ap ? "f/" + n(x.ap) + (x.ap_tele && x.ap_tele !== x.ap ? "–" + n(x.ap_tele) : "") : "?"}</td><td class="num">${n(x.n)}</td>
@@ -228,7 +229,7 @@ let lastLensList = null;
 const D = { lens: "", fl: "", fnum: "", basis: "kb" };
 try { Object.assign(D, JSON.parse(localStorage.getItem("detail") || "{}"), { lens: "" }); } catch (e) {}
 let detailToken = 0;
-const fnumText = (v) => v.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const fnumText = (v) => v.toLocaleString(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const parseNum = (s) => { const v = parseFloat(String(s).replace(",", ".")); return Number.isFinite(v) && v > 0 ? v : null; };
 
 function detailRows(items, kind, selected, label) {

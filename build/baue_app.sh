@@ -9,7 +9,7 @@ DIST="$PROJECT/dist"
 CACHE="${1:-$(mktemp -d)}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
-VERSION="${VERSION:-1.0}"
+VERSION="${VERSION:-1.1}"
 BUNDLE_ID="${BUNDLE_ID:-local.brennweiten-tool}"
 SIGN_ID="${SIGN_ID:-}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-}"
@@ -45,29 +45,32 @@ cat > "$C/Info.plist" <<PLIST
 <key>CFBundleShortVersionString</key><string>$VERSION</string>
 <key>CFBundleVersion</key><string>$VERSION</string>
 <key>CFBundleDevelopmentRegion</key><string>de</string>
+<key>CFBundleLocalizations</key><array><string>de</string><string>en</string></array>
 <key>LSMinimumSystemVersion</key><string>12.3</string>
 <key>LSApplicationCategoryType</key><string>public.app-category.photography</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSPrincipalClass</key><string>NSApplication</string>
 <key>BWNotarized</key><$NOTARIZED/>
 <key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
-<key>NSDesktopFolderUsageDescription</key><string>Brennweiten liest Fotos in den von dir gewählten Ordnern.</string>
-<key>NSDocumentsFolderUsageDescription</key><string>Brennweiten liest Fotos in den von dir gewählten Ordnern.</string>
-<key>NSDownloadsFolderUsageDescription</key><string>Brennweiten liest Fotos in den von dir gewählten Ordnern.</string>
-<key>NSRemovableVolumesUsageDescription</key><string>Brennweiten liest Fotos auf den von dir gewählten Laufwerken.</string>
-<key>NSNetworkVolumesUsageDescription</key><string>Brennweiten liest Fotos auf den von dir gewählten Netzlaufwerken.</string>
+<key>NSDesktopFolderUsageDescription</key><string>Brennweiten liest Fotos in den von dir gewählten Ordnern. / Brennweiten reads photos in the folders you choose.</string>
+<key>NSDocumentsFolderUsageDescription</key><string>Brennweiten liest Fotos in den von dir gewählten Ordnern. / Brennweiten reads photos in the folders you choose.</string>
+<key>NSDownloadsFolderUsageDescription</key><string>Brennweiten liest Fotos in den von dir gewählten Ordnern. / Brennweiten reads photos in the folders you choose.</string>
+<key>NSRemovableVolumesUsageDescription</key><string>Brennweiten liest Fotos auf den von dir gewählten Laufwerken. / Brennweiten reads photos on the drives you choose.</string>
+<key>NSNetworkVolumesUsageDescription</key><string>Brennweiten liest Fotos auf den von dir gewählten Netzlaufwerken. / Brennweiten reads photos on the network drives you choose.</string>
 </dict></plist>
 PLIST
 
-/usr/bin/python3 - "$PROJECT/LIESMICH.md" "$C/Resources/Anleitung.txt" <<'PY'
+/usr/bin/python3 - "$PROJECT" "$C/Resources" <<'PY'
 import re, sys
-s = open(sys.argv[1], encoding="utf-8").read()
-a = s.find("## Für Entwickler")
-if a >= 0:
-    s = s[:a].rstrip() + "\n"
-s = re.sub(r"\*\*(.+?)\*\*", r"\1", s).replace("`", "")
-s = re.sub(r"^#+ ", "", s, flags=re.M)
-open(sys.argv[2], "w", encoding="utf-8").write(s)
+for src, dst, dev, lang in (("LIESMICH.md", "Anleitung.txt", "## Für Entwickler", "**Deutsch** · [English](GUIDE.md)\n\n"),
+                            ("GUIDE.md", "Guide.txt", "## For developers", "[Deutsch](LIESMICH.md) · **English**\n\n")):
+    s = open(sys.argv[1] + "/" + src, encoding="utf-8").read().replace(lang, "")
+    a = s.find(dev)
+    if a >= 0:
+        s = s[:a].rstrip() + "\n"
+    s = re.sub(r"\*\*(.+?)\*\*", r"\1", s).replace("`", "")
+    s = re.sub(r"^#+ ", "", s, flags=re.M)
+    open(sys.argv[2] + "/" + dst, "w", encoding="utf-8").write(s)
 PY
 
 for pair in arm.tgz:arm64 x86.tgz:x86_64; do
@@ -127,7 +130,7 @@ fi
 
 rm -rf "$DIST"; mkdir -p "$DIST"
 ditto -c -k --norsrc --noextattr --keepParent "$A" "$DIST/Brennweiten.zip"
-D="$WORK/dmg"; mkdir "$D"; ditto "$A" "$D/Brennweiten.app"; ln -s /Applications "$D/Programme"
+D="$WORK/dmg"; mkdir "$D"; ditto "$A" "$D/Brennweiten.app"; ln -s /Applications "$D/Applications"
 hdiutil create -quiet -fs HFS+ -volname "Brennweiten" -srcfolder "$D" -format UDZO -ov "$DIST/Brennweiten.dmg"
 if [ -n "$SIGN_ID" ]; then codesign --force --timestamp --sign "$SIGN_ID" "$DIST/Brennweiten.dmg"; fi
 if [ -n "$NOTARY_PROFILE" ]; then

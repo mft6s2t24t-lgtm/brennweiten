@@ -9,14 +9,14 @@ function refresh() { renderChips(); TABS[activeTab()](); }
 const jsonAttr = (o) => esc(JSON.stringify(o));
 function pl(text, spec) { return `<button class="link" data-photos="${jsonAttr(spec)}">${text}</button>`; }
 const pp = (v) => (v > 0 ? "+" : "") + nf.format(v) + " Pkt.";
-const dateDE = (d) => (d ? d.slice(8, 10) + "." + d.slice(5, 7) + "." + d.slice(0, 4) : "–");
+const dateDE = (d) => (d && LANG === "en" ? d.slice(0, 10) : d ? d.slice(8, 10) + "." + d.slice(5, 7) + "." + d.slice(0, 4) : "–");
 
 /* ---------- Alle Tabellen sortierbar ---------- */
 function cellValue(td) {
   const inp = td.querySelector("input[type=text],input[type=number]");
   const t = (inp ? inp.value : td.textContent).trim();
-  const m = t.match(/^[^\d-]{0,3}(-?\d[\d.]*(?:,\d+)?)/);
-  return m ? { num: parseFloat(m[1].replace(/\./g, "").replace(",", ".")), t } : { num: null, t };
+  const m = t.match(LANG === "en" ? /^[^\d-]{0,3}(-?\d[\d,]*(?:\.\d+)?)/ : /^[^\d-]{0,3}(-?\d[\d.]*(?:,\d+)?)/);
+  return m ? { num: parseFloat(LANG === "en" ? m[1].replace(/,/g, "") : m[1].replace(/\./g, "").replace(",", ".")), t } : { num: null, t };
 }
 function markTables() { $$("main table:not(.grid)").forEach((t) => t.classList.add("sortable")); }
 new MutationObserver(markTables).observe(document.querySelector("main"), { childList: true, subtree: true });
@@ -37,7 +37,7 @@ document.addEventListener("click", (e) => {
     if (b.v.num != null) return 1;
     if (!a.v.t) return 1;
     if (!b.v.t) return -1;
-    return f * a.v.t.localeCompare(b.v.t, "de", { numeric: true });
+    return f * a.v.t.localeCompare(b.v.t, LANG, { numeric: true });
   });
   rows.forEach((x) => body.appendChild(x.r));
 });
@@ -341,6 +341,16 @@ $("#w-choose").onclick = async () => {
 /* ---------- Start ---------- */
 async function boot() {
   F.cf = F.cf || {};
+  $$("[data-lang]").forEach((b) => {
+    b.classList.toggle("on", b.dataset.lang === LANG);
+    b.onclick = async () => {
+      if (b.dataset.lang === LANG) return;
+      await api("/api/settings", { lang: b.dataset.lang });
+      if (NATIVE) await nativeCall({ cmd: "lang", lang: b.dataset.lang });
+      location.reload();
+    };
+  });
+  if (NATIVE) nativeCall({ cmd: "lang", lang: LANG, save: false });
   COLS = await api("/api/columns");
   markTables();
   let tab = "auswertung";

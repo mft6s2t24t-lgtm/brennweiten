@@ -1,14 +1,14 @@
-name: Idee vorschlagen
-description: Eine neue Funktion oder Verbesserung
+name: Idee vorschlagen / Suggest an idea
+description: Eine neue Funktion oder Verbesserung / A new feature or improvement
 labels: [enhancement]
 body:
   - type: textarea
     id: ziel
     attributes:
-      label: Welche Frage möchtest du mit der App beantworten können?
+      label: Welche Frage möchtest du mit der App beantworten können? / What question do you want the app to answer?
     validations:
       required: true
   - type: textarea
     id: vorschlag
     attributes:
-      label: Wie könnte das aussehen?
+      label: Wie könnte das aussehen? / What could it look like?

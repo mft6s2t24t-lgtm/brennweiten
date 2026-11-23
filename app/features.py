@@ -1,5 +1,6 @@
 """Kaufhilfe und Komfort: Simulator, Sets, Lichtgewinn, Fototage, Trefferquote, Vergleich, Datenqualität.
 Alles reine Zahlen aus den eigenen Fotos, keine Empfehlung."""
+import i18n
 import math
 import os
 import statistics
@@ -241,8 +242,8 @@ def keepers(conn, f):
 
     hint = None
     if rated_all < 0.2 * max(1, len(imgs)):
-        hint = ("Nur %s %% der Fotos sind bewertet. Die Quoten zeigen also, wo du bewertet hast, "
-                "und sind nur ein grober Anhaltspunkt." % analyse.fmt(pct(rated_all, len(imgs))))
+        hint = (i18n.t("Nur %s %% der Fotos sind bewertet. Die Quoten zeigen also, wo du bewertet hast, "
+                       "und sind nur ein grober Anhaltspunkt.") % analyse.fmt(pct(rated_all, len(imgs))))
     return {"n": len(imgs), "rated": rated_all, "rated_pct": pct(rated_all, len(imgs)),
             "good": sum(1 for i in imgs if i["rating"] and i["rating"] >= GOOD), "hint": hint,
             "small": SMALL_SAMPLE, "lens": table(lambda i: i["lens"]),

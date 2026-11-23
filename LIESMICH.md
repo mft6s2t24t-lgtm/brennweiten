@@ -1,5 +1,7 @@
 # Brennweiten-Tool
 
+**Deutsch** · [English](GUIDE.md)
+
 Wertet aus den EXIF-Daten deiner Fotos aus, welche Brennweiten du wirklich nutzt – als Grundlage
 für Objektiv-Entscheidungen. Läuft komplett lokal, ohne Internet. **Fotos werden nur gelesen,
 nie verändert, verschoben oder umbenannt.**
@@ -83,6 +85,7 @@ legen. Deine Fotos sind davon nicht betroffen.
 - **Tabelle:** alle gezählten Fotos wie in Excel. Klick auf eine Überschrift sortiert, ⇧-Klick sortiert zusätzlich nach einer weiteren Spalte. Das ▾ öffnet Werteliste, Textfilter und Von-bis-Filter. Spaltenfilter gelten auch für die Auswertungen, CSV und PDF.
 - **Objektiv prüfen:** Trage bis zu drei Objektive ein. Die App zeigt, wie oft du in diesem Bereich lagst, welche eigenen Objektive du dort genutzt hast, was die Lichtstärke gebracht hätte und was neu dazukäme. Sie gibt keine Kaufempfehlung. Fotos zeigen nur, was mit deiner bisherigen Ausrüstung möglich war. Festbrennweiten zählen mit ±6 %. Der Lichtgewinn rechnet mit gleicher Belichtungszeit und nur mit Fotos bei Offenblende über ISO 3200.
 - **Vergleich:** zwei Objektive, Kameras oder Zeiträume nebeneinander, Unterschiede in Prozentpunkten.
+- **Sprache:** Die App startet in der Sprache deines Macs. Unten in der Seitenleiste wechselst du jederzeit zwischen Deutsch und English.
 - **Info-Buttons:** Das ⓘ neben Bereichen, Filtern und Feldern erklärt per Mauszeiger, Klick oder Tastatur, was du dort siehst und einstellen kannst.
 - **Datenqualität:** fehlende Angaben, unbestätigte Objektive und mögliche Duplikate.
 - **Beispielbilder:** blaue Zahlen öffnen die passenden Fotos. Vorschauen werden nur aus den Fotos gelesen und im eigenen Datenordner unter `vorschau` gespeichert.

@@ -6,6 +6,7 @@ import statistics
 import analyse
 import db
 import features
+import i18n
 from analyse import CLASSES, GOOD, in_range, pct
 
 ISO_BINS = [("≤200", None, 200), ("400", 201, 400), ("800", 401, 800), ("1.600", 801, 1600), ("3.200", 1601, 3200),
@@ -188,7 +189,7 @@ def rule_text(t):
         parts.append("ab ISO %g" % t["iso_min"])
     if t.get("f_max"):
         parts.append("f/%g oder offener" % t["f_max"])
-    return " · ".join(parts).replace(".", ",")
+    return i18n.decimal(" · ".join(parts))
 
 
 def tile_values(conn, f, tiles):
@@ -210,11 +211,11 @@ def tile_values(conn, f, tiles):
             return {"value": _median([i["kb"] for i in kb]), "fmt": "mm", "sub": "KB-Äquivalent"}
         if tid == "top_lens":
             t = _count(imgs, "lens", 1)
-            return {"value": t[0]["name"] if t else "–", "fmt": "text", "sub": "%s %% der Fotos" % analyse.fmt(t[0]["pct"]) if t else ""}
+            return {"value": t[0]["name"] if t else "–", "fmt": "text", "sub": i18n.t("%s %% der Fotos") % analyse.fmt(t[0]["pct"]) if t else ""}
         if tid == "top_class":
             rows = [(lab, sum(1 for i in kb if in_range(i["kbr"], lo, hi))) for lab, lo, hi in CLASSES]
             lab, c = max(rows, key=lambda x: x[1]) if rows else ("–", 0)
-            return {"value": lab + " mm" if c else "–", "fmt": "text", "sub": "%s %% der Fotos" % analyse.fmt(pct(c, nk))}
+            return {"value": lab + " mm" if c else "–", "fmt": "text", "sub": i18n.t("%s %% der Fotos") % analyse.fmt(pct(c, nk))}
         if tid == "days":
             return {"value": len(dates), "fmt": "n", "sub": "Tage mit Fotos"}
         if tid == "per_day":
@@ -268,7 +269,7 @@ def tile_values(conn, f, tiles):
 
 
 def _de(v):
-    return "{:,}".format(v).replace(",", ".")
+    return i18n.number(v)
 
 
 def tiles_payload(conn, f):

@@ -1,6 +1,8 @@
 """Excel-artige Tabelle: Spalten, Filter je Spalte, Sortierung, Werte-Listen."""
 import statistics
 
+import i18n
+
 # (Schlüssel, Überschrift, Typ)
 COLUMNS = [
     ("file", "Datei", "text"), ("folder", "Ordner", "text"), ("path", "Pfad", "text"),
@@ -135,13 +137,15 @@ def export_value(col, row, fmt):
     if v is None:
         return ""
     if typ == "bool":
-        return "ja" if v else "nein"
+        return i18n.t("ja" if v else "nein")
     if key == "exptime":
         return fmt(float(v), 6)
     if key == "iso":
         return fmt(float(v), 0)
     if isinstance(v, float):
         return fmt(v)
+    if key in ("lens", "weekday", "kb_src"):
+        return i18n.t(v)
     return v
 
 
