@@ -2,7 +2,7 @@
 
 **Deutsch** · [English](README.md)
 
-[![Aktuelle Version](https://img.shields.io/github/v/release/mft6s2t24t-lgtm/brennweiten)](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest) [![Self-test](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml/badge.svg)](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml) ![macOS 12.3+](https://img.shields.io/badge/macOS-12.3%2B-blue) [![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Aktuelle Version](https://img.shields.io/github/v/release/mft6s2t24t-lgtm/brennweiten)](https://github.com/mft6s2t24t-lgtm/brennweiten/releases/latest) [![Self-test](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/mft6s2t24t-lgtm/brennweiten/actions/workflows/test.yml) ![macOS 12.3+](https://img.shields.io/badge/macOS-12.3%2B-blue) [![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Welche Brennweiten nutzt du wirklich?** Wähle deine Fotoordner in dieser kostenlosen Mac-App und sieh, wie du tatsächlich fotografierst, bevor du das nächste Objektiv kaufst.
 
